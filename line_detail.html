@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title id="pageTitle">线路详情 | 夏苏城轨道交通</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="line_detail_base.css">
+  <style id="dynamicLineStyle">
+    /* 动态线路颜色会通过JS注入 */
+  </style>
+</head>
+<body>
+
+<div class="fixed-top-bar">
+  <div class="top-bar" id="topBar">
+    <div class="lang-switch" id="langSwitch">
+      <span data-lang="zh-Hans" class="active-lang">简</span>
+      <span data-lang="zh-Hant">繁</span>
+      <span data-lang="en">EN</span>
+      <span data-lang="ja">日本語</span>
+    </div>
+    <div class="music-control">
+      <span class="music-label"><i class="fas fa-headphones"></i> <span id="musicText">森脇正敏 - 甘いひととき</span></span>
+      <button class="music-btn" id="musicToggle"><i class="fas fa-play"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="line-header" id="lineHeader">
+  <div class="line-header-container">
+    <div class="line-id-badge" id="lineNumberBadge">7</div>
+    <div class="line-title-group">
+      <h1 class="line-name-main" id="lineName">7号线 · 快线</h1>
+      <div class="line-name-sub" id="lineNameEn">Line 7</div>
+    </div>
+    <a href="index.html" class="back-home-btn"><i class="fas fa-home"></i> <span class="i18n-line" data-key="back_home">返回主页</span></a>
+  </div>
+</div>
+
+<div class="line-content">
+  <section class="info-card map-card" id="line-map">
+    <h3><i class="fas fa-map"></i> <span class="i18n-line" data-key="route_map_title">线路图</span></h3>
+    <div class="map-container">
+      <img id="routeMapImg" src="" alt="线路图" class="route-img" loading="lazy">
+      <p class="img-caption i18n-line" data-key="map_caption">线路走向示意（点击可放大）</p>
+    </div>
+  </section>
+
+  <section class="info-card stations-card" id="stations">
+    <h3><i class="fas fa-table-list"></i> <span class="i18n-line" data-key="stations_title">站点信息</span></h3>
+    <div class="stations-img-wrapper">
+      <!-- 主线表格图片 -->
+      <img id="stationsTableImg" src="" alt="站点列表" class="stations-table-img" loading="lazy">
+      <!-- 支线表格图片（仅2、8号线显示） -->
+      <img id="branchTableImg" src="" alt="支线站点列表" class="stations-table-img branch-table-img" loading="lazy" style="display: none; margin-top: 20px;">
+      <div class="legend-note"><span class="legend-dot" id="legendDot"></span> <span class="i18n-line" data-key="stations_note">点击图片可放大 | 数据基于表格</span></div>
+    </div>
+  </section>
+
+  <section class="timeline-card" id="history">
+    <h3><i class="fas fa-timeline"></i> <span class="i18n-line" data-key="history_title">线路沿革</span></h3>
+    <div class="history-table-container">
+      <table class="history-table" id="lineHistoryTable">
+        <thead>
+          <tr><th class="i18n-line" data-key="history_date">时间</th><th class="i18n-line" data-key="history_event">事件</th><th class="i18n-line" data-key="history_section">区段/备注</th></tr>
+        </thead>
+        <tbody id="lineHistoryBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="scenery-card" id="scenery">
+    <h3><i class="fas fa-landmark"></i> <span class="i18n-line" data-key="scenery_title">沿线风物 · 一站一景</span></h3>
+    <div class="culture-grid" id="lineCultureGrid"></div>
+    <div class="more-link-wrapper">
+      <a href="more_culture.html" target="_blank" class="more-culture-link"><i class="fas fa-camera"></i> <span class="i18n-line" data-key="more_scenery">更多风物 →</span></a>
+    </div>
+  </section>
+</div>
+
+<div class="page-notice line-notice">
+  <p class="i18n-line" data-key="notice1">注意：1）本网页展示的轨道交通线网基于Minecraft游戏进行虚拟构建，与现实中的任何城市、线路或规划均无实际关联；</p>
+  <p class="i18n-line" data-key="notice2">2）换乘站在统计站点数量时按照所属线路重复计数，特此说明；</p>
+  <p class="i18n-line" data-key="notice3">3）因美术需要，本线网以x轴正方向为北方向；</p>
+  <p class="red-text i18n-line" data-key="notice4">4）未经授权，禁止任何形式的搬运、转载或二次发布。</p>
+</div>
+<footer>
+  <div>© 2026 夏苏城轨道交通 Natsu Stellar Railwork | <span id="footerLineName">7号线</span>专页</div>
+  <div>kjustinmiskovichsf@gmail.com</div>
+</footer>
+
+<audio id="bgMusic" loop preload="auto">
+  <source src="./music/森脇正敏 - 甘いひととき.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  (function() {
+    // ==================== 线路配置数据库 ====================
+    const linesConfig = {
+      1: {
+        name: { 'zh-Hans': '1号线 · 小环线', 'zh-Hant': '1號線 · 小環線', 'en': 'Line 1 · Loop', 'ja': '1号線 · 小環状線' },
+        nameEn: 'Line 1',
+        color: '#a43034',
+        historyEvents: [
+          ['2022.4-6', '1号线一期', '科技城→望天阁'],
+          ['2022.6-7', '1号线二期（蘑孤支线）', '蘑孤→科技城'],
+          ['2023.1-2', '1号线三期', '蘑孤→望天阁']
+        ],
+        sceneries: [
+      { img: './pictures/sceneries/ATRI学校.png', lineColor: '#a43034', lineText: '1号线', station: '涓生站', spot: 'ATRI学校' },
+      { img: './pictures/sceneries/苏州园林.png', lineColor: '#a43034', lineText: '1号线', station: '芜芷站', spot: '苏州园林' },
+      { img: './pictures/sceneries/夏莱.png', lineColor: '#a43034', lineText: '1号线', station: '地铁公司站', spot: '夏莱' },
+        ]
+      },
+      2: {
+        name: { 'zh-Hans': '2号线 · 海线', 'zh-Hant': '2號線 · 海線', 'en': 'Line 2 · Coastal', 'ja': '2号線 · 海岸線' },
+        nameEn: 'Line 2',
+        color: '#ec9cbb',
+        historyEvents: [
+          ['2022.9-10', '2号线一期', '科技城→尽道'],
+          ['2022.9', '2号线支线', '涤尘湾→业水'],
+          ['2023.11', '2号线支线', '"业水"站改名"邺水"']
+        ],
+        sceneries: [{ img: './pictures/sceneries/埃菲尔铁塔.png', lineColor: '#ec9cbb', lineText: '2号线/2号线支线', station: '涤尘湾站', spot: '埃菲尔铁塔' },]
+      },
+      3: {
+        name: { 'zh-Hans': '3号线 · 换乘线', 'zh-Hant': '3號線 · 轉乘線', 'en': 'Line 3 · Transfer', 'ja': '3号線 · 乗換線' },
+        nameEn: 'Line 3',
+        color: '#9dabaa',
+        historyEvents: [
+          ['2025.6-7', '3号线一期', '极界→风白花园'],
+          ['2025.7-8', '3号线二期', '无度湾→极界']
+        ],
+        sceneries: [
+          { img: './pictures/sceneries/樱羽艾玛fumo.png', lineColor: '#9dabaa', lineText: '3号线', station: '长泉镇站', spot: '樱羽艾玛fumo' },
+        ]
+      },
+      4: {
+        name: { 'zh-Hans': '4号线 · 北线', 'zh-Hant': '4號線 · 北線', 'en': 'Line 4 · North', 'ja': '4号線 · 北線' },
+        nameEn: 'Line 4',
+        color: '#a6d30b',
+        historyEvents: [
+          ['2023.1-4', '4号线', '伟饯→叶卡加尔'],
+          ['2025.9', '4号线北延线', '叶卡加尔→如初']
+        ],
+        sceneries: [
+          { img: './pictures/sceneries/埃菲尔铁塔.png', lineColor: '#a6d30b', lineText: '4号线', station: '涤尘湾站', spot: '埃菲尔铁塔' },
+          { img: './pictures/sceneries/罗比火山.png', lineColor: '#a6d30b', lineText: '4号线', station: '罗比火山东麓站', spot: '罗比火山' },
+          { img: './pictures/sceneries/滕王阁.png', lineColor: '#a6d30b', lineText: '4号线', station: '稀竹原站', spot: '滕王阁' },
+          { img: './pictures/sceneries/灯塔.png', lineColor: '#a6d30b', lineText: '4号线', station: '文德斯灯塔站', spot: '灯塔' },
+        ]
+      },
+      5: {
+        name: { 'zh-Hans': '5号线 · 山线', 'zh-Hant': '5號線 · 山線', 'en': 'Line 5 · Mountain', 'ja': '5号線 · 山線' },
+        nameEn: 'Line 5',
+        color: '#f6d300',
+        historyEvents: [
+          ['2022.7-9', '5号线一期', '科技城→太和町'],
+          ['2023.6-9', '5号线二期', '科技城→千锥城'],
+          ['2025.8', '5号线改线', '新增站点"蘑孤"']
+        ],
+        sceneries: [
+          { img: './pictures/sceneries/城市公园.png', station: '天池瀑站', spot: '城市公园' },
+          { img: './pictures/sceneries/问天坛.png', station: '问天坛站', spot: '问天坛' }
+        ]
+      },
+      6: {
+        name: { 'zh-Hans': '6号线 · 中线', 'zh-Hant': '6號線 · 中線', 'en': 'Line 6 · Central', 'ja': '6号線 · 中央線' },
+        nameEn: 'Line 6',
+        color: '#007128',
+        historyEvents: [
+          ['2023.11-2024.4', '6号线一期', '勇者地牢→夏苏村'],
+          ['2024.4-6', '6号线二期', '夏苏村→垂星野']
+        ],
+        sceneries: [
+          { img: './pictures/sceneries/稻花海.png', lineColor: '#007128', lineText: '6号线', station: '稻花海站', spot: '稻花海' },
+          { img: './pictures/sceneries/群玉阁.png', lineColor: '#007128', lineText: '6号线', station: '白汀洲站', spot: '群玉阁' },
+          { img: './pictures/sceneries/樱花庄园.png', lineColor: '#007128', lineText: '6号线', station: '樱花村站', spot: '樱花庄园' },
+        ]
+      },
+      7: {
+        name: { 'zh-Hans': '7号线 · 快线', 'zh-Hant': '7號線 · 快線', 'en': 'Line 7 · Express', 'ja': '7号線 · 快速線' },
+        nameEn: 'Line 7',
+        color: '#00a3e9',
+        historyEvents: [
+          ['2022.10-12', '7号线一期', '尽道→明王府'],
+          ['2023.4-6', '7号线二期', '蘑孤→尽道'],
+          ['2023.9-11', '7号线三期', '蘑孤→汨罗镇']
+        ],
+        sceneries: [
+           { img: './pictures/sceneries/海上别墅.png', lineColor: '#00a3e9', lineText: '7号线', station: '琼索斯海原站', spot: '海上别墅' },
+        ]
+      },
+      8: {
+        name: { 'zh-Hans': '8号线 · 西南线', 'zh-Hant': '8號線 · 西南線', 'en': 'Line 8 · Southwest', 'ja': '8号線 · 南西線' },
+        nameEn: 'Line 8',
+        color: '#eb7c16',
+        historyEvents: [
+          ['2024.6-9', '8号线一期', '撷菌→海神宫'],
+          ['2024.9-10', '8号线二期', '撷菌→灰河'],
+          ['2024.10', '8号线支线', '灰河→清明宫'],
+          ['2024.10-12', '8号线三期', '灰河→阳关'],
+          ['2024.12', '8号线', '"海神宫"站改名"跃鱼庭"']
+        ],
+        sceneries: [
+          { img: './pictures/sceneries/飞船.png', lineColor: '#eb7c16', lineText: '8号线', station: '広肃站', spot: '飞船' },
+        ]
+      },
+      9: {
+        name: { 'zh-Hans': '9号线 · 大环线', 'zh-Hant': '9號線 · 大環線', 'en': 'Line 9 · Grand Loop', 'ja': '9号線 · 大環状線' },
+        nameEn: 'Line 9',
+        color: '#469c7f',
+        historyEvents: [
+          ['2025.1-2', '9号线南段', '南洋大道西→南洋大道东'],
+          ['2025.2-3', '9号线东段', '南洋大道东→鲤池'],
+          ['2025.3-4', '9号线西段', '南阳大道西→半亩麦田'],
+          ['2025.4-6', '9号线北段', '半亩麦田→拂晓'],
+          ['2025.8', '9号线', '"朱家榜"更名"世纪仓储"，"梁家贩"更名"朱家榜"']
+        ],
+        sceneries: [
+          { img: './pictures/sceneries/海上别墅.png', lineColor: '#469c7f', lineText: '9号线', station: '琼索斯海原站', spot: '海上别墅' },
+          { img: './pictures/sceneries/世纪仓储.png', lineColor: '#469c7f', lineText: '9号线', station: '世纪仓储站', spot: '世纪仓储' },
+        ]
+      },
+      10: {
+        name: { 'zh-Hans': '10号线 · 东线', 'zh-Hant': '10號線 · 東線', 'en': 'Line 10 · East', 'ja': '10号線 · 東線' },
+        nameEn: 'Line 10',
+        color: '#974537',
+        historyEvents: [
+          ['2025.9-2026.1', '10号线', 'T2航站楼→灵兮宗']
+        ],
+        sceneries: [
+              { img: './pictures/sceneries/樱羽艾玛fumo.png', lineColor: '#974537', lineText: '10号线', station: '长泉镇站', spot: '樱羽艾玛fumo' },
+
+        ]
+      },
+      14: {
+        name: { 'zh-Hans': '14号线 · 南线', 'zh-Hant': '14號線 · 南線', 'en': 'Line 14 · South', 'ja': '14号線 · 南線' },
+        nameEn: 'Line 14',
+        color: '#c24c6d',
+        historyEvents: [
+          ['2024.12', '14号线一期', '五汇路→异界关隘'],
+          ['2026.1-3', '14号线二期', '万枢邸→五汇路'],
+          ['2026.3-4', '14号线三期', '异界关隘→崇明岛']
+        ],
+        sceneries: [
+          { img: './pictures/sceneries/仙人掌塔.png', lineColor: '#c24c6d', lineText: '14号线', station: '仙人掌种植园站', spot: '仙人掌塔' },
+        ]
+      }
+    };
+
+    // 未开通线路占位符 (11, 12, 13) 也加一下颜色配置以便预览
+    const placeholderColors = {
+      11: '#825aa3',
+      12: '#404040',
+      13: '#c24c6d'
+    };
+
+    // ==================== 获取URL参数 ====================
+    function getLineNumber() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const line = parseInt(urlParams.get('line'));
+      return (line >= 1 && line <= 14) ? line : 7;
+    }
+
+    const lineNum = getLineNumber();
+    let lineData = linesConfig[lineNum];
+    let lineColor = lineData ? lineData.color : (placeholderColors[lineNum] || '#00a3e9');
+    
+    // 如果没有配置数据（11,12,13），创建默认数据
+    if (!lineData) {
+      lineData = {
+        name: { 'zh-Hans': `${lineNum}号线 · 暂未开通`, 'zh-Hant': `${lineNum}號線 · 暫未開通`, 'en': `Line ${lineNum} · Planning`, 'ja': `${lineNum}号線 · 計画中` },
+        nameEn: `Line ${lineNum}`,
+        color: lineColor,
+        historyEvents: [],
+        sceneries: []
+      };
+    }
+
+    // ==================== 国际化数据 ====================
+    const i18nLine = {
+      'zh-Hans': {
+        back_home: '返回主页', route_map_title: '线路图', map_caption: '线路走向示意（点击可放大）',
+        stations_title: '站点信息', stations_note: '点击图片可放大 | 数据基于表格',
+        history_title: '线路沿革', history_date: '时间', history_event: '事件', history_section: '区段/备注',
+        scenery_title: '沿线风物 · 一站一景', more_scenery: '更多风物 →',
+        notice1: '注意：1）本网页展示的轨道交通线网基于Minecraft游戏进行虚拟构建，与现实中的任何城市、线路或规划均无实际关联；',
+        notice2: '2）换乘站在统计站点数量时按照所属线路重复计数，特此说明；',
+        notice3: '3）因美术需要，本线网以x轴正方向为北方向；',
+        notice4: '4）未经授权，禁止任何形式的搬运、转载或二次发布。',
+        music: '森脇正敏 - 甘いひととき'
+      },
+      'zh-Hant': {
+        back_home: '返回主頁', route_map_title: '線路圖', map_caption: '線路走向示意（點擊可放大）',
+        stations_title: '站點資訊', stations_note: '點擊圖片可放大 | 數據基於表格',
+        history_title: '線路沿革', history_date: '時間', history_event: '事件', history_section: '區段/備註',
+        scenery_title: '沿線風物 · 一站一景', more_scenery: '更多風物 →',
+        notice1: '注意：1）本網頁展示的軌道交通線網基於Minecraft遊戲進行虛擬構建，與現實中的任何城市、線路或規劃均無實際關聯；',
+        notice2: '2）換乘站在統計站點數量時按照所屬線路重複計數，特此說明；',
+        notice3: '3）因美術需要，本線網以x軸正方向為北方向；',
+        notice4: '4）未經授權，禁止任何形式的搬運、轉載或二次發布。',
+        music: '森脇正敏 - 甘いひととき'
+      },
+      'en': {
+        back_home: 'Home', route_map_title: 'Route Map', map_caption: 'Line alignment (click to zoom)',
+        stations_title: 'Station Info', stations_note: 'Click to enlarge | Table data',
+        history_title: 'Line History', history_date: 'Date', history_event: 'Event', history_section: 'Section',
+        scenery_title: 'Scenery Along the Line', more_scenery: 'More Scenery →',
+        notice1: 'Note: 1) The rail transit network displayed on this website is virtually constructed based on Minecraft and has no actual connection with any real city, line, or plan;',
+        notice2: '2) Transfer stations are counted repeatedly according to the lines they belong to;',
+        notice3: '3) For artistic purposes, the positive x-axis direction is designated as north;',
+        notice4: '4) Unauthorized reproduction, reposting, or redistribution of any form is prohibited.',
+        music: 'Moriwaki Masatoshi - Sweet Moment'
+      },
+      'ja': {
+        back_home: 'ホームへ', route_map_title: '路線図', map_caption: '路線示意（クリックで拡大）',
+        stations_title: '駅情報', stations_note: 'クリックで拡大 | テーブルデータ',
+        history_title: '路線沿革', history_date: '日付', history_event: '出来事', history_section: '区間',
+        scenery_title: '沿線風景', more_scenery: 'さらに見る →',
+        notice1: '注意：1）当ウェブサイトに表示される鉄道網はMinecraft上で仮想的に構築されたものであり、実際の都市・路線・計画とは一切関係ありません；',
+        notice2: '2）乗換駅は所属路線ごとに重複してカウントされています；',
+        notice3: '3）美術上の都合により、本線網ではx軸正方向を北としています；',
+        notice4: '4）無断転載・複製・二次配布を禁止します。',
+        music: '森脇正敏 - 甘いひととき'
+      }
+    };
+
+    let currentLang = 'zh-Hans';
+
+    // 应用线路主题色和样式（渐变：左边标识色，右边渐变到白色）以及顶部栏颜色
+    function applyLineTheme() {
+      const style = document.getElementById('dynamicLineStyle');
+      style.innerHTML = `
+        .top-bar { background: ${lineColor} !important; }
+        .line-header { background: linear-gradient(90deg, ${lineColor} 0%, ${lineColor} 30%, #ffffff 80%, #ffffff 100%); border-bottom: 3px solid ${lineColor}cc; }
+        .line-id-badge { background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); box-shadow: 0 6px 14px rgba(0,0,0,0.1); }
+        .info-card h3, .timeline-card h3, .scenery-card h3 { border-left-color: ${lineColor}; }
+        .legend-dot { background: ${lineColor}; }
+      `;
+      document.getElementById('legendDot').style.background = lineColor;
+    }
+
+    // 渲染沿革表格
+    function renderLineHistory() {
+      const tbody = document.getElementById('lineHistoryBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (lineData.historyEvents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px;">暂无沿革数据</td></tr>`;
+        return;
+      }
+      lineData.historyEvents.forEach(event => {
+        const tr = document.createElement('tr');
+        event.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 渲染风物
+    function renderCultureGrid() {
+      const container = document.getElementById('lineCultureGrid');
+      if (!container) return;
+      container.innerHTML = '';
+      if (lineData.sceneries.length === 0) {
+        container.innerHTML = `<div class="no-data"><i class="fas fa-leaf"></i> <span class="i18n-line" data-key="no_scenery">暂未收录该线风物，敬请期待</span></div>`;
+        return;
+      }
+      lineData.sceneries.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'culture-card';
+        const imgDiv = document.createElement('div');
+        imgDiv.className = 'culture-img';
+        imgDiv.style.backgroundImage = `url('${item.img}')`;
+        const badge = document.createElement('span');
+        badge.className = 'culture-line-badge';
+        badge.style.borderLeftColor = lineColor;
+        badge.innerHTML = `<i class="fas fa-subway"></i> ${lineNum}号线`;
+        imgDiv.appendChild(badge);
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'culture-info';
+        infoDiv.innerHTML = `<h4>${item.spot}</h4><div class="culture-meta"><span><i class="fas fa-map-pin"></i> ${item.station}</span><span>${lineNum}号线</span></div>`;
+        card.appendChild(imgDiv);
+        card.appendChild(infoDiv);
+        container.appendChild(card);
+      });
+    }
+
+    // 应用语言
+    function applyLanguage(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.lang-switch span').forEach(el => el.classList.remove('active-lang'));
+      document.querySelector(`.lang-switch span[data-lang="${lang}"]`).classList.add('active-lang');
+      const data = i18nLine[lang] || i18nLine['zh-Hans'];
+      
+      // 更新线路名称（中文/日文显示带副标题，英文只显示Line X）
+      if (lang === 'en') {
+        document.getElementById('lineName').textContent = lineData.name[lang] || `Line ${lineNum}`;
+      } else {
+        document.getElementById('lineName').textContent = lineData.name[lang] || lineData.name['zh-Hans'];
+      }
+      // 英文副标题始终显示 Line X
+      document.getElementById('lineNameEn').textContent = `Line ${lineNum}`;
+      document.getElementById('lineNumberBadge').textContent = lineNum;
+      document.getElementById('footerLineName').textContent = `${lineNum}号线`;
+      document.title = `${lineData.name[lang] || lineData.name['zh-Hans']} | 夏苏城轨道交通`;
+      
+      // 更新其他i18n文本
+      document.querySelectorAll('.i18n-line').forEach(el => {
+        const key = el.dataset.key;
+        if (data[key]) {
+          if (key === 'music') {
+            document.getElementById('musicText').innerHTML = `<i class="fas fa-headphones"></i> ${data[key]}`;
+          } else {
+            el.innerHTML = data[key];
+          }
+        }
+      });
+      
+      const musicSpan = document.querySelector('.music-control .music-label');
+      if (musicSpan && data.music) {
+        musicSpan.innerHTML = `<i class="fas fa-headphones"></i> ${data.music}`;
+      }
+    }
+
+    // 加载图片
+    function loadImages() {
+      const routeImg = document.getElementById('routeMapImg');
+      const stationImg = document.getElementById('stationsTableImg');
+      const branchImg = document.getElementById('branchTableImg');
+      
+      routeImg.src = `./pictures/routes/Line ${lineNum}.png`;
+      stationImg.src = `./pictures/information/Line ${lineNum}.png`;
+      
+      // 2号线和8号线有支线表格
+      if (lineNum === 2 || lineNum === 8) {
+        branchImg.src = `./pictures/information/Line ${lineNum}_branch.png`;
+        branchImg.style.display = 'block';
+        branchImg.onerror = () => { branchImg.style.display = 'none'; };
+      } else {
+        branchImg.style.display = 'none';
+      }
+      
+      routeImg.onerror = () => { routeImg.src = './pictures/fallback_route.png'; routeImg.alt = '线路图加载失败'; };
+      stationImg.onerror = () => { stationImg.src = './pictures/fallback_station.png'; stationImg.alt = '站点表格加载失败'; };
+    }
+
+    // 灯箱功能
+    function initLightbox() {
+      const images = document.querySelectorAll('.route-img, .stations-table-img');
+      const lightbox = document.createElement('div');
+      lightbox.id = 'dynamicLightbox';
+      lightbox.className = 'lightbox';
+      lightbox.innerHTML = '<img id="lightboxImg" src=""><div class="lightbox-controls"><button id="zoomOutBtn"><i class="fas fa-search-minus"></i></button><span id="zoomLevel">100%</span><button id="zoomInBtn"><i class="fas fa-search-plus"></i></button></div>';
+      document.body.appendChild(lightbox);
+      
+      let scale = 1;
+      const lbImg = document.getElementById('lightboxImg');
+      const zoomSpan = document.getElementById('zoomLevel');
+      
+      images.forEach(img => {
+        img.style.cursor = 'zoom-in';
+        img.addEventListener('click', () => {
+          lbImg.src = img.src;
+          scale = 1;
+          lbImg.style.transform = 'scale(1)';
+          zoomSpan.textContent = '100%';
+          lightbox.style.display = 'flex';
+        });
+      });
+      
+      lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.style.display = 'none'; });
+      document.getElementById('zoomInBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        scale = Math.min(5, scale + 0.5);
+        lbImg.style.transform = `scale(${scale})`;
+        zoomSpan.textContent = Math.round(scale * 100) + '%';
+      });
+      document.getElementById('zoomOutBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        scale = Math.max(1, scale - 0.5);
+        lbImg.style.transform = `scale(${scale})`;
+        zoomSpan.textContent = Math.round(scale * 100) + '%';
+      });
+    }
+
+    // 音乐控制 - 默认关闭
+    const bgMusic = document.getElementById('bgMusic');
+    if (bgMusic) {
+      bgMusic.volume = 0.3;
+      const musicBtn = document.getElementById('musicToggle');
+      if (musicBtn) {
+        musicBtn.addEventListener('click', () => {
+          if (bgMusic.paused) {
+            bgMusic.play().catch(e => console.log('播放失败'));
+            musicBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          } else {
+            bgMusic.pause();
+            musicBtn.innerHTML = '<i class="fas fa-play"></i>';
+          }
+        });
+      }
+    }
+
+    // 语言切换
+    document.querySelectorAll('.lang-switch span').forEach(span => {
+      span.addEventListener('click', () => applyLanguage(span.dataset.lang));
+    });
+
+    // 初始化
+    applyLineTheme();
+    loadImages();
+    renderLineHistory();
+    renderCultureGrid();
+    initLightbox();
+    applyLanguage('zh-Hans');
+  })();
+</script>
+</body>
+</html>

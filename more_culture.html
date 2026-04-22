@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>沿线风物志 · 夏苏城轨道交通</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      background: #f5f8fc;
+      padding-top: 56px;
+    }
+
+    /* 顶部栏 */
+    .fixed-top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+
+    .top-bar {
+      background: #a6d30b;
+      color: #1a3a2a;
+      padding: 12px 5vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .lang-switch { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 5px; 
+    }
+
+    .lang-switch span {
+      cursor: pointer; 
+      padding: 6px 12px; 
+      border-radius: 30px;
+      background: rgba(255,255,255,0.3); 
+      transition: 0.2s; 
+      font-weight: 500;
+      color: #1a3a2a;
+    }
+
+    .lang-switch span:hover { 
+      background: rgba(255,255,255,0.5); 
+    }
+
+    .lang-switch .active-lang { 
+      background: white; 
+    }
+
+    .music-control { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+    }
+
+    .music-btn {
+      background: rgba(0,0,0,0.15); 
+      border: none; 
+      color: #1a3a2a; 
+      width: 44px; 
+      height: 44px;
+      border-radius: 44px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      cursor: pointer; 
+      font-size: 1.3rem;
+      transition: 0.15s;
+    }
+
+    .music-btn:hover { 
+      background: rgba(0,0,0,0.25); 
+    }
+
+    /* 页面头部 */
+    .page-header {
+      background: linear-gradient(135deg, #f6d300 0%, #f6d300 40%, #ffffff 100%);
+      padding: 40px 5vw 30px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .header-title h1 {
+      font-size: clamp(32px, 6vw, 48px);
+      color: white;
+      font-weight: 600;
+      text-shadow: 0 2px 8px rgba(255,255,255,0.5);
+      margin-bottom: 8px;
+    }
+
+    .header-title p {
+      font-size: clamp(14px, 3vw, 18px);
+      color: white;
+      letter-spacing: 2px;
+    }
+
+    .back-home-btn {
+      padding: 12px 28px;
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(4px);
+      color: #1a3a2a;
+      text-decoration: none;
+      border-radius: 40px;
+      font-weight: 500;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255,255,255,0.5);
+      font-size: 1.1rem;
+    }
+
+    .back-home-btn:hover {
+      background: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    /* 风物网格 */
+    .culture-section {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 5vw 40px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      margin-bottom: 30px;
+      border-left: 8px solid #f6d300;
+      padding-left: 20px;
+      color: #0b2c40;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .culture-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      margin-bottom: 30px;
+    }
+
+    @media (min-width: 600px) {
+      .culture-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1000px) {
+      .culture-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1400px) {
+      .culture-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .culture-card {
+      background: white;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .culture-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.12);
+    }
+
+    .culture-img {
+      width: 100%;
+      height: 240px;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: flex-end;
+      padding: 16px;
+      position: relative;
+    }
+
+    .culture-line-badge {
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      padding: 8px 18px;
+      border-radius: 40px;
+      color: white;
+      font-weight: 600;
+      border-left: 6px solid;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .culture-info {
+      padding: 24px;
+    }
+
+    .culture-info h4 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #1a3a5c;
+    }
+
+    .culture-meta {
+      display: flex;
+      gap: 20px;
+      color: #5f8aaa;
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+    }
+
+    .culture-meta i {
+      width: 18px;
+      margin-right: 4px;
+    }
+
+    .station-count {
+      margin-top: 40px;
+      text-align: center;
+      color: #6b8eaa;
+      font-size: 0.95rem;
+      padding-top: 20px;
+      border-top: 1px solid #d0e2f0;
+    }
+
+    .station-count i {
+      margin-right: 8px;
+      color: #f6d300;
+    }
+
+    /* 底部 */
+    .page-notice {
+      padding: 20px 5vw 30px;
+      color: #888;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      border-top: 1px solid #ddd;
+      margin-top: 20px;
+    }
+
+    .red-text { 
+      color: #d32f2f; 
+      font-weight: 500; 
+    }
+
+    footer {
+      background: #0a1e2b;
+      color: #b0c8dd;
+      padding: 28px 5vw;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    /* 灯箱 */
+    .lightbox {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      overflow: auto;
+    }
+
+    .lightbox.dragging { 
+      cursor: grabbing; 
+    }
+
+    .lightbox img {
+      width: auto;
+      max-width: 90%;
+      height: auto;
+      max-height: 90%;
+      transform: scale(1);
+      transition: transform 0.2s;
+      user-select: none;
+      pointer-events: none;
+      display: block;
+      object-fit: contain;
+    }
+
+    .lightbox-controls {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(8px);
+      border-radius: 50px;
+      padding: 8px 24px;
+      display: flex;
+      gap: 20px;
+      z-index: 10001;
+    }
+
+    .lightbox-controls button {
+      background: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: transform 0.1s;
+    }
+
+    .lightbox-controls button:hover {
+      transform: scale(1.05);
+    }
+
+    .lightbox-controls span {
+      color: white;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+
+    /* 加载动画 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .culture-card {
+      animation: fadeIn 0.4s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+<div class="fixed-top-bar">
+  <div class="top-bar">
+    <div class="lang-switch" id="langSwitch">
+      <span data-lang="zh-Hans" class="active-lang">简</span>
+      <span data-lang="zh-Hant">繁</span>
+      <span data-lang="en">EN</span>
+      <span data-lang="ja">日本語</span>
+    </div>
+    <div class="music-control">
+      <span id="musicLabel"><i class="fas fa-headphones"></i> 森脇正敏 - 甘いひととき</span>
+      <button class="music-btn" id="musicToggle"><i class="fas fa-play"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <div class="header-content">
+    <div class="header-title">
+      <h1 id="pageTitle">沿线风物志 · 一站一景</h1>
+      <p id="pageSubtitle">Natsu Stellar Railwork · 夏の星を巡る旅</p>
+    </div>
+    <a href="index.html" class="back-home-btn" id="backHomeBtn"><i class="fas fa-home"></i> 返回主页</a>
+  </div>
+</div>
+
+<div class="culture-section">
+  <h2 class="section-title" id="allSceneryTitle">
+    <i class="fas fa-landmark"></i> 
+    <span>已收录线网风物</span>
+  </h2>
+  <div class="culture-grid" id="cultureGrid"></div>
+  <div class="station-count" id="stationNote">
+    <i class="fas fa-info-circle"></i>
+    <span>每一站都是风景，每一景都有故事</span>
+  </div>
+</div>
+
+<div class="page-notice">
+  <p id="notice1">注意：1）本网页展示的轨道交通线网基于Minecraft游戏进行虚拟构建，与现实中的任何城市、线路或规划均无实际关联；</p>
+  <p id="notice2">2）换乘站在统计站点数量时按照所属线路重复计数，特此说明；</p>
+  <p id="notice3">3）因美术需要，本线网以x轴正方向为北方向；</p>
+  <p class="red-text" id="notice4">4）未经授权，禁止任何形式的搬运、转载或二次发布。</p>
+</div>
+
+<footer>
+  <div>© 2026 夏苏城轨道交通 Natsu Stellar Railwork</div>
+  <div>kjustinmiskovichsf@gmail.com</div>
+</footer>
+
+<audio id="bgMusic" loop preload="auto">
+  <source src="./music/森脇正敏 - 甘いひととき.mp3" type="audio/mpeg">
+</audio>
+
+<!-- 灯箱 -->
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" src="" alt="风物图片" draggable="false">
+  <div class="lightbox-controls">
+    <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
+    <span id="zoomLevel">100%</span>
+    <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ==================== 全部风物数据 ====================
+    const allSceneries = [
+      { img: './pictures/sceneries/ATRI学校.png', lineColor: '#a43034', lineText: '1号线', station: '涓生站', spot: 'ATRI学校' },
+      { img: './pictures/sceneries/苏州园林.png', lineColor: '#a43034', lineText: '1号线', station: '芜芷站', spot: '苏州园林' },
+      { img: './pictures/sceneries/夏莱.png', lineColor: '#a43034', lineText: '1号线/8号线支线', station: '地铁公司站', spot: '夏莱' },
+      { img: './pictures/sceneries/埃菲尔铁塔.png', lineColor: '#ec9cbb', lineText: '2号线/2号线支线/4号线', station: '涤尘湾站', spot: '埃菲尔铁塔' },
+      { img: './pictures/sceneries/樱羽艾玛fumo.png', lineColor: '#9dabaa', lineText: '3号线/10号线', station: '长泉镇站', spot: '樱羽艾玛fumo' },
+      { img: './pictures/sceneries/罗比火山.png', lineColor: '#a6d30b', lineText: '4号线', station: '罗比火山东麓站', spot: '罗比火山' },
+      { img: './pictures/sceneries/滕王阁.png', lineColor: '#a6d30b', lineText: '4号线', station: '稀竹原站', spot: '滕王阁' },
+      { img: './pictures/sceneries/灯塔.png', lineColor: '#a6d30b', lineText: '4号线', station: '文德斯灯塔站', spot: '灯塔' },
+      { img: './pictures/sceneries/城市公园.png', lineColor: '#f6d300', lineText: '5号线', station: '天池瀑站', spot: '城市公园' },
+      { img: './pictures/sceneries/问天坛.png', lineColor: '#f6d300', lineText: '5号线', station: '问天坛站', spot: '问天坛' },
+      { img: './pictures/sceneries/稻花海.png', lineColor: '#007128', lineText: '6号线', station: '稻花海站', spot: '稻花海' },
+      { img: './pictures/sceneries/群玉阁.png', lineColor: '#007128', lineText: '6号线', station: '白汀洲站', spot: '群玉阁' },
+      { img: './pictures/sceneries/樱花庄园.png', lineColor: '#007128', lineText: '6号线', station: '樱花村站', spot: '樱花庄园' },
+      { img: './pictures/sceneries/海上别墅.png', lineColor: '#00a3e9', lineText: '7号线/9号线', station: '琼索斯海原站', spot: '海上别墅' },
+      { img: './pictures/sceneries/飞船.png', lineColor: '#eb7c16', lineText: '8号线', station: '広肃站', spot: '飞船' },
+      { img: './pictures/sceneries/世纪仓储.png', lineColor: '#469c7f', lineText: '9号线', station: '世纪仓储站', spot: '世纪仓储' },
+      { img: './pictures/sceneries/仙人掌塔.png', lineColor: '#c24c6d', lineText: '14号线', station: '仙人掌种植园站', spot: '仙人掌塔' },
+    ];
+
+    // ==================== 国际化数据 ====================
+    const i18nData = {
+      'zh-Hans': {
+        page_title: '沿线风物志 · 一站一景',
+        page_subtitle: 'Natsu Stellar Railwork · 夏の星を巡る旅',
+        back_home: '返回主页',
+        all_scenery: '全线网风物',
+        station_note: '每一站都是风景，每一景都有故事',
+        notice1: '注意：1）本网页展示的轨道交通线网基于Minecraft游戏进行虚拟构建，与现实中的任何城市、线路或规划均无实际关联；',
+        notice2: '2）换乘站在统计站点数量时按照所属线路重复计数，特此说明；',
+        notice3: '3）因美术需要，本线网以x轴正方向为北方向；',
+        notice4: '4）未经授权，禁止任何形式的搬运、转载或二次发布。',
+        music: '森脇正敏 - 甘いひととき'
+      },
+      'zh-Hant': {
+        page_title: '沿線風物誌 · 一站一景',
+        page_subtitle: 'Natsu Stellar Railwork · 夏の星を巡る旅',
+        back_home: '返回主頁',
+        all_scenery: '全線網風物',
+        station_note: '每一站都是風景，每一景都有故事',
+        notice1: '注意：1）本網頁展示的軌道交通線網基於Minecraft遊戲進行虛擬構建，與現實中的任何城市、線路或規劃均無實際關聯；',
+        notice2: '2）換乘站在統計站點數量時按照所屬線路重複計數，特此說明；',
+        notice3: '3）因美術需要，本線網以x軸正方向為北方向；',
+        notice4: '4）未經授權，禁止任何形式的搬運、轉載或二次發布。',
+        music: '森脇正敏 - 甘いひととき'
+      },
+      'en': {
+        page_title: 'Scenery Along the Line',
+        page_subtitle: 'Natsu Stellar Railwork · Journey Through Stars',
+        back_home: 'Home',
+        all_scenery: 'All Network Scenery',
+        station_note: 'Every station is a view, every view tells a story',
+        notice1: 'Note: 1) The rail transit network displayed on this website is virtually constructed based on Minecraft and has no actual connection with any real city, line, or plan;',
+        notice2: '2) Transfer stations are counted repeatedly according to the lines they belong to;',
+        notice3: '3) For artistic purposes, the positive x-axis direction is designated as north;',
+        notice4: '4) Unauthorized reproduction, reposting, or redistribution of any form is prohibited.',
+        music: 'Moriwaki Masatoshi - Sweet Moment'
+      },
+      'ja': {
+        page_title: '沿線風物詩 · 駅景色',
+        page_subtitle: 'Natsu Stellar Railwork · 夏の星を巡る旅',
+        back_home: 'ホームへ',
+        all_scenery: '全線網風物',
+        station_note: 'どの駅も景色、どの景色にも物語がある',
+        notice1: '注意：1）当ウェブサイトに表示される鉄道網はMinecraft上で仮想的に構築されたものであり、実際の都市・路線・計画とは一切関係ありません；',
+        notice2: '2）乗換駅は所属路線ごとに重複してカウントされています；',
+        notice3: '3）美術上の都合により、本線網ではx軸正方向を北としています；',
+        notice4: '4）無断転載・複製・二次配布を禁止します。',
+        music: '森脇正敏 - 甘いひととき'
+      }
+    };
+
+    let currentLang = 'zh-Hans';
+
+    // ==================== 渲染风物网格 ====================
+    function renderCultureGrid() {
+      const container = document.getElementById('cultureGrid');
+      container.innerHTML = '';
+      
+      allSceneries.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'culture-card';
+        
+        const imgDiv = document.createElement('div');
+        imgDiv.className = 'culture-img';
+        imgDiv.style.backgroundImage = `url('${item.img}')`;
+        
+        const badge = document.createElement('span');
+        badge.className = 'culture-line-badge';
+        badge.style.borderLeftColor = item.lineColor;
+        badge.innerHTML = `<i class="fas fa-subway"></i> ${item.lineText}`;
+        
+        imgDiv.appendChild(badge);
+        
+        const info = document.createElement('div');
+        info.className = 'culture-info';
+        info.innerHTML = `
+          <h4>${item.spot}</h4>
+          <div class="culture-meta">
+            <span><i class="fas fa-map-pin"></i> ${item.station}</span>
+            <span><i class="fas fa-train"></i> ${item.lineText}</span>
+          </div>
+        `;
+        
+        card.appendChild(imgDiv);
+        card.appendChild(info);
+        
+        // 点击卡片放大图片
+        card.addEventListener('click', () => {
+          const lightbox = document.getElementById('lightbox');
+          const lightboxImg = document.getElementById('lightboxImg');
+          lightboxImg.src = item.img;
+          currentScale = 1;
+          lightboxImg.style.transform = `scale(1)`;
+          document.getElementById('zoomLevel').textContent = '100%';
+          lightbox.style.display = 'flex';
+        });
+        
+        container.appendChild(card);
+      });
+    }
+
+    // ==================== 应用语言 ====================
+    function applyLanguage(lang) {
+      currentLang = lang;
+      
+      // 更新语言切换按钮状态
+      document.querySelectorAll('.lang-switch span').forEach(el => {
+        el.classList.remove('active-lang');
+      });
+      document.querySelector(`.lang-switch span[data-lang="${lang}"]`).classList.add('active-lang');
+      
+      const data = i18nData[lang] || i18nData['zh-Hans'];
+      
+      // 更新页面文本
+      document.getElementById('pageTitle').textContent = data.page_title;
+      document.getElementById('pageSubtitle').textContent = data.page_subtitle;
+      document.getElementById('backHomeBtn').innerHTML = `<i class="fas fa-home"></i> ${data.back_home}`;
+      
+      const titleSpan = document.querySelector('#allSceneryTitle span');
+      if (titleSpan) {
+        titleSpan.textContent = data.all_scenery;
+      }
+      
+      const noteSpan = document.querySelector('#stationNote span');
+      if (noteSpan) {
+        noteSpan.textContent = data.station_note;
+      }
+      
+      document.getElementById('notice1').textContent = data.notice1;
+      document.getElementById('notice2').textContent = data.notice2;
+      document.getElementById('notice3').textContent = data.notice3;
+      document.getElementById('notice4').textContent = data.notice4;
+      
+      document.getElementById('musicLabel').innerHTML = `<i class="fas fa-headphones"></i> ${data.music}`;
+      
+      document.title = `${data.page_title} | 夏苏城轨道交通`;
+    }
+
+    // ==================== 灯箱功能 ====================
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    let currentScale = 1;
+    let isDragging = false;
+    let startX, startY, scrollLeft, scrollTop;
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        lightbox.style.display = 'none';
+        return;
+      }
+      if (e.target.closest('.lightbox-controls')) return;
+      if (currentScale < 5) {
+        currentScale = Math.min(5, currentScale + 0.5);
+        lightboxImg.style.transform = `scale(${currentScale})`;
+        document.getElementById('zoomLevel').textContent = Math.round(currentScale * 100) + '%';
+      }
+    });
+
+    lightbox.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      lightbox.style.display = 'none';
+    });
+
+    lightbox.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      if (e.target === lightboxImg || e.target.closest('.lightbox-controls')) return;
+      isDragging = true;
+      lightbox.classList.add('dragging');
+      startX = e.pageX - lightbox.offsetLeft;
+      startY = e.pageY - lightbox.offsetTop;
+      scrollLeft = lightbox.scrollLeft;
+      scrollTop = lightbox.scrollTop;
+      e.preventDefault();
+    });
+
+    lightbox.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const x = e.pageX - lightbox.offsetLeft;
+      const y = e.pageY - lightbox.offsetTop;
+      lightbox.scrollLeft = scrollLeft - (x - startX);
+      lightbox.scrollTop = scrollTop - (y - startY);
+    });
+
+    const stopDragging = () => {
+      isDragging = false;
+      lightbox.classList.remove('dragging');
+    };
+
+    lightbox.addEventListener('mouseup', stopDragging);
+    lightbox.addEventListener('mouseleave', stopDragging);
+
+    document.getElementById('zoomIn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentScale < 5) {
+        currentScale = Math.min(5, currentScale + 0.5);
+        lightboxImg.style.transform = `scale(${currentScale})`;
+        document.getElementById('zoomLevel').textContent = Math.round(currentScale * 100) + '%';
+      }
+    });
+
+    document.getElementById('zoomOut').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentScale > 1) {
+        currentScale = Math.max(1, currentScale - 0.5);
+        lightboxImg.style.transform = `scale(${currentScale})`;
+        document.getElementById('zoomLevel').textContent = Math.round(currentScale * 100) + '%';
+      }
+    });
+
+    // ==================== 音乐控制 ====================
+    const bgMusic = document.getElementById('bgMusic');
+    if (bgMusic) {
+      bgMusic.volume = 0.3;
+      const musicBtn = document.getElementById('musicToggle');
+      if (musicBtn) {
+        musicBtn.addEventListener('click', () => {
+          if (bgMusic.paused) {
+            bgMusic.play().catch(e => console.log('播放失败'));
+            musicBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          } else {
+            bgMusic.pause();
+            musicBtn.innerHTML = '<i class="fas fa-play"></i>';
+          }
+        });
+      }
+    }
+
+    // ==================== 语言切换 ====================
+    document.querySelectorAll('.lang-switch span').forEach(span => {
+      span.addEventListener('click', () => applyLanguage(span.dataset.lang));
+    });
+
+    // ==================== 初始化 ====================
+    renderCultureGrid();
+    applyLanguage('zh-Hans');
+  })();
+</script>
+</body>
+</html>

@@ -1,46 +1,129 @@
----
-layout: page
-description: "「离开世界之前 一切都是过程」"
----
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>夏苏城轨道交通 · 夏の星</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-{% for post in paginator.posts %}
-<div class="post-preview">
-    <a href="{{ post.url | prepend: site.baseurl }}">
-        <h2 class="post-title">
-            {{ post.title }}
-        </h2>
-        {% if post.subtitle %}
-        <h3 class="post-subtitle">
-            {{ post.subtitle }}
-        </h3>
-        {% endif %}
-        <div class="post-content-preview">
-            {% if post.lang == 'en' %}
-                {{ post.content | strip_html | truncate:300 }}
-            {% else %}
-                {{ post.content | strip_html | truncate:200 }}
-            {% endif %}
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B %-d, %Y" }}
-    </p>
+<div id="splash-screen">
+  <img src="./pictures/logo/logo.png" alt="启动LOGO">
 </div>
-<hr>
-{% endfor %}
 
-<!-- Pager -->
-{% if paginator.total_pages > 1 %}
-<ul class="pager">
-    {% if paginator.previous_page %}
-    <li class="previous">
-        <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr; Newer Posts</a>
-    </li>
-    {% endif %}
-    {% if paginator.next_page %}
-    <li class="next">
-        <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older Posts &rarr;</a>
-    </li>
-    {% endif %}
-</ul>
-{% endif %}
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" src="" alt="线网图" draggable="false">
+  <div class="lightbox-controls">
+    <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
+    <span id="zoomLevel">100%</span>
+    <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
+  </div>
+</div>
+
+<div class="fixed-top-bar">
+  <div class="top-bar">
+    <div class="lang-switch" id="langSwitch">
+      <span data-lang="zh-Hans" class="active-lang">简</span>
+      <span data-lang="zh-Hant">繁</span>
+      <span data-lang="en">EN</span>
+      <span data-lang="ja">日本語</span>
+    </div>
+    <div class="music-control">
+      <span><i class="fas fa-headphones"></i> 森脇正敏 - 甘いひととき</span>
+      <button class="music-btn" id="musicToggle"><i class="fas fa-pause"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="header-main">
+  <div class="logo-area">
+    <div class="logo-img-box">
+      <img src="./pictures/logo/logo_without_title.png" alt="夏苏城轨道交通 logo">
+    </div>
+    <div class="logo-text">
+      <h1 class="i18n" data-key="company_name">夏苏城轨道交通</h1>
+      <p>NATSU STELLAR RAILWORK</p>
+    </div>
+  </div>
+  <div class="main-nav">
+    <a href="#company" class="i18n" data-key="nav_about"><i class="fas fa-building"></i> 公司介绍</a>
+    <a href="#lines" class="i18n" data-key="nav_lines"><i class="fas fa-subway"></i> 运营线路</a>
+    <a href="#network" class="i18n" data-key="nav_network"><i class="fas fa-network-wired"></i> 运营线网</a>
+    <a href="#news" class="i18n" data-key="nav_news"><i class="fas fa-hard-hat"></i> 建设消息</a>
+    <a href="#plan" class="i18n" data-key="nav_plan"><i class="fas fa-draw-polygon"></i> 建设规划</a>
+    <a href="#history" class="i18n" data-key="nav_history"><i class="fas fa-timeline"></i> 发展沿革</a>
+    <a href="#culture" class="i18n" data-key="nav_culture"><i class="fas fa-landmark"></i> 风物志</a>
+  </div>
+</div>
+
+<div class="company-intro" id="company">
+  <h2 class="i18n" data-key="about_title">公司介绍</h2>
+  <div class="intro-content i18n" data-key="about_text"></div>
+</div>
+
+<div class="line-showcase" id="lines">
+  <div class="section-title">
+    <h2 class="i18n" data-key="line_title">运营线路 · 城市动脉</h2>
+    <span class="i18n" data-key="line_click">点击卡片查看线路详情</span>
+  </div>
+  <div class="line-grid" id="lineGrid"></div>
+</div>
+
+<div class="info-blocks" id="network">
+  <div class="net-map">
+    <h3><i class="fas fa-map"></i> <span class="i18n" data-key="netmap_title">运营线网 · 标识图</span></h3>
+    <div class="map-placeholder" id="mapImage" style="background-image: url('./pictures/map/map.png'); aspect-ratio:1/1; width:100%;" title="点击放大查看"></div>
+  </div>
+  <div class="build-news" id="news">
+    <h3><i class="fas fa-rss"></i> <span class="i18n" data-key="news_title">建设消息</span></h3>
+    <div class="news-item"><strong class="i18n" data-key="news1_title">14号线三期开通试运营</strong><p class="i18n" data-key="news1_desc"></p><div>2026-03-29</div></div>
+    <div class="news-item"><strong class="i18n" data-key="news2_title">仙人掌塔完工</strong><p class="i18n" data-key="news2_desc"></p><div>2026-03-15</div></div>
+    <div class="news-item"><strong class="i18n" data-key="news3_title">14号线二期开通试运营</strong><p class="i18n" data-key="news3_desc"></p><div>2026-03-03</div></div>
+    <div class="news-item"><strong class="i18n" data-key="news4_title">10号线开通试运营</strong><p class="i18n" data-key="news4_desc"></p><div>2026-01-10</div></div>
+  </div>
+</div>
+
+<div class="plan-section" id="plan">
+  <h2 style="font-size:28px; margin-bottom:20px; border-left:8px solid; padding-left:20px;" class="i18n" data-key="plan_title">建设规划</h2>
+  <div class="plan-grid">
+    <div class="plan-card"><i class="fas fa-subway"></i> <span class="i18n" data-key="plan12">12号线 · 高架线</span></div>
+    <div class="plan-card"><i class="fas fa-subway"></i> <span class="i18n" data-key="plan13">13号线 · 远郊线</span></div>
+    <div class="plan-card"><i class="fas fa-subway"></i> <span class="i18n" data-key="plan11">11号线 · 西线</span></div>
+  </div>
+</div>
+
+<div class="history-section" id="history">
+  <h2 style="font-size:28px; margin-bottom:20px; border-left:8px solid; padding-left:20px;" class="i18n" data-key="history_title">发展沿革</h2>
+  <div class="history-table-container">
+    <table class="history-table" id="historyTable"><tbody id="historyBody"></tbody></table>
+    <button class="more-history-btn" id="toggleHistoryBtn"><span class="i18n" data-key="show_more">查看更多</span> <i class="fas fa-chevron-down"></i></button>
+  </div>
+</div>
+
+<div class="culture-section" id="culture">
+  <h2 class="culture-title i18n" data-key="culture_title">沿线风物志 · 一站一景</h2>
+  <div class="culture-grid" id="cultureGrid"></div>
+  <div class="footer-note"><a href="more_culture.html" target="_blank"><i class="fas fa-camera"></i> <span class="i18n" data-key="more_culture">更多风物</span> →</a></div>
+</div>
+
+<div class="page-notice">
+  <p class="i18n" data-key="notice1"></p>
+  <p class="i18n" data-key="notice2"></p>
+  <p class="i18n" data-key="notice3"></p>
+  <p class="red-text i18n" data-key="notice4"></p>
+</div>
+
+<footer>
+  <div>© 2026 夏苏城轨道交通 Natsu Stellar Railwork</div>
+  <div>kjustinmiskovichsf@gmail.com</div>
+</footer>
+
+<audio id="bgMusic" loop preload="auto" autoplay>
+  <source src="./music/森脇正敏 - 甘いひととき.mp3" type="audio/mpeg">
+</audio>
+
+<script src="script.js"></script>
+</body>
+</html>
